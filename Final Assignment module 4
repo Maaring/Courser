@@ -1,0 +1,63 @@
+#Question 1 
+tesla = yf.Ticker("TSLA")
+tesla_data = tesla.history(period='max')
+tesla_data.reset_index(inplace=True)
+tesla_data.head()
+
+#question 2 
+url=' https://www.macrotrends.net/stocks/charts/TSLA/tesla/revenue'
+html_data=requests.get(url).text
+soup = BeautifulSoup(html_data, 'html5lib')
+soup
+tesla_tables = soup.find_all('table')
+
+for index,table in enumerate(tesla_tables):
+    if ("Tesla Quarterly Revenue" in str(table)):
+        tesla_table_index = index
+
+tesla_revenue = pd.DataFrame(columns=["Date", "Revenue"])
+
+for row in tesla_tables[tesla_table_index].tbody.find_all("tr"):
+    col = row.find_all("td")
+    if (col !=[]):
+        date = col[0].text
+        revenue = col[1].text.replace("$", "").replace(",", "")
+        tesla_revenue = tesla_revenue.append({"Date" : date, "Revenue" : revenue}, ignore_index=True)
+        
+ tesla_revenue.dropna(inplace=True)
+
+tesla_revenue = tesla_revenue[tesla_revenue['Revenue'] != ""]
+tesla_revenue.tail()
+
+#Question 3 
+gamestop = yf.Ticker("GME")
+gme_data = gamestop.history(period='max')
+gme_data.reset_index(inplace=True)
+gme_data.head()
+
+#Question 4 
+url='  https://cf-courses-data.s3.us.cloud-object-storage.appdomain.cloud/IBMDeveloperSkillsNetwork-PY0220EN-SkillsNetwork/labs/project/stock.html'
+html_data=requests.get(url).text
+soup = BeautifulSoup(html_data, 'html5lib')
+gme_tables = soup.find_all('table')
+
+for index,table in enumerate(gme_tables):
+    if ("GameStop Quarterly Revenue" in str(table)):
+        gme_table_index = index
+
+gme_revenue = pd.DataFrame(columns=["Date", "Revenue"])
+
+for row in gme_tables[gme_table_index].tbody.find_all("tr"):
+    col = row.find_all("td")
+    if (col !=[]):
+        date = col[0].text
+        revenue = col[1].text.replace("$", "").replace(",", "")
+        gme_revenue = gme_revenue.append({"Date" : date, "Revenue" : revenue}, ignore_index=True)
+        
+gme_revenue.tail()
+
+#Question 5
+make_graph(tesla_data, tesla_revenue, 'Tesla')
+
+#Question 6
+make_graph(gme_data, gme_revenue, 'GameStop')
